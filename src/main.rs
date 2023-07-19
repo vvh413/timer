@@ -67,7 +67,7 @@ impl Timer {
         if !pause.load(Ordering::Relaxed) {
           if locked_duration.subsec_millis() == 0 {
             stdout
-              .write_all(format!("{line_start}{}{line_end}", humantime::format_duration(*locked_duration)).as_bytes())
+              .write_all(format!("{line_start}{}{line_end:>3}", humantime::format_duration(*locked_duration)).as_bytes())
               .await?;
             stdout.flush().await?;
           }
