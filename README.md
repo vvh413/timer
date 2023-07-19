@@ -14,3 +14,11 @@ Options:
   -h, --help               Print help
   -V, --version            Print version
 ```
+
+## Installation
+
+```sh
+git clone https://github.com/vvh413/timer.git
+cd timer
+cargo install --path .
+```
