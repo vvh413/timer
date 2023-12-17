@@ -9,7 +9,7 @@ use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 use tokio::sync::Mutex;
 use tokio::task::JoinHandle;
 
-const TIMER_STEP_MS: u64 = 200;
+const TIMER_STEP_MS: u64 = 500;
 const TOGGLE_CHAR: char = '\n';
 
 #[derive(Parser, Debug)]
@@ -60,21 +60,22 @@ impl Timer {
     tokio::spawn(async move {
       let mut stdout = tokio::io::stdout();
       loop {
+        interval.tick().await;
         let mut locked_duration = duration.lock().await;
         if locked_duration.is_zero() {
           break;
         }
         if !pause.load(Ordering::Relaxed) {
           if locked_duration.subsec_millis() == 0 {
+            let time = humantime::format_duration(*locked_duration);
             stdout
-              .write_all(format!("{line_start}{}{line_end:>3}", humantime::format_duration(*locked_duration)).as_bytes())
+              .write_all(format!("{line_start}{time}{line_end:>3}",).as_bytes())
               .await?;
             stdout.flush().await?;
           }
 
           *locked_duration = locked_duration.saturating_sub(timer_step);
         }
-        interval.tick().await;
       }
       println!("{line_start}done");
       Ok(())
